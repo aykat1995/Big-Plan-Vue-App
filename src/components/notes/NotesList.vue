@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, defineProps } from 'vue'
 import { useStore } from 'vuex'
 import NoteItem from './NoteItem.vue'
 import type { Note } from '@/types'
@@ -10,6 +10,16 @@ const notes = computed(() => store.state.notes)
 const activeCategoryId = computed(() => store.state.activeCategoryId)
 const activeNote = computed(() => store.state.activeNote)
 const activeNodeId = computed(() => activeNote.value?.id ?? null)
+const clickedNote = ref<Note | null>(null)
+const isEditing = ref(false)
+const dropdownPosition = ref({ x: 0, y: 0 })
+
+const props = defineProps({
+    handleParentClick: {
+        require: true,
+        type: Object,
+    },
+})
 
 const currentCategoryNotes = computed(() => {
     if (activeCategoryId.value === -1) {
@@ -30,6 +40,50 @@ const handleCreatingNote = () => {
     const newNote = createNewNote()
     store.dispatch('addNote', newNote)
 }
+
+const handleRightClick = (e: MouseEvent, id: number) => {
+    e.preventDefault()
+
+    dropdownPosition.value = {
+        x: e.clientX,
+        y: e.clientY,
+    }
+
+    clickedNote.value = notes.value.find((note: Note) => note.id === id)
+
+    if (e.which === 3) {
+        isEditing.value = true
+    }
+}
+
+const pinNote = () => {
+    if (clickedNote.value) {
+        store.dispatch('updateNote', {
+            ...clickedNote.value,
+            pined: true,
+        })
+    }
+    clickedNote.value = null
+}
+
+const deleteNote = () => {
+    const isConfirm = confirm('Вы действительно хотите удалить заметку?')
+    if (isConfirm) {
+        if (clickedNote.value) {
+            store.dispatch('deleteNote', clickedNote.value)
+        }
+    }
+    clickedNote.value = null
+}
+
+const closeDropdown = () => {
+    isEditing.value = false
+}
+
+watch(
+    () => props.handleParentClick,
+    () => closeDropdown(),
+)
 </script>
 
 <template>
@@ -53,6 +107,7 @@ const handleCreatingNote = () => {
                 :key="note.id"
                 class="border-b border-gray-100 last:border-b-0"
                 @click="noteClickHandle(note.id)"
+                @contextmenu="handleRightClick($event, note.id)"
             >
                 <NoteItem
                     :title="note.title"
@@ -70,6 +125,40 @@ const handleCreatingNote = () => {
             >
                 <span class="mr-2 text-lg">+</span> Новая заметка
             </button>
+        </div>
+
+        <!-- Действия с заметкой -->
+        <div
+            v-show="isEditing"
+            class="fixed bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[180px]"
+            :style="{
+                left: dropdownPosition.x + 'px',
+                top: dropdownPosition.y + 'px',
+            }"
+            @click.stop
+        >
+            <ul class="text-sm text-gray-700">
+                <li
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150 flex items-center"
+                    @click="pinNote"
+                >
+                    <span class="mr-2">📌</span>
+                    Закрепить
+                </li>
+                <li
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150 flex items-center"
+                >
+                    <span class="mr-2">📁</span>
+                    Добавить в категорию
+                </li>
+                <li
+                    class="px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer transition-colors duration-150 flex items-center border-t border-gray-100"
+                    @click="deleteNote"
+                >
+                    <span class="mr-2">🗑️</span>
+                    Удалить
+                </li>
+            </ul>
         </div>
     </div>
 </template>

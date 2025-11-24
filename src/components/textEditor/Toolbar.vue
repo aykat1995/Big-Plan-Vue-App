@@ -22,18 +22,6 @@ const handleButtonClick = (action, params = null) => {
                 <span class="group-label">Заголовок</span>
                 <div class="group-buttons flex gap-1">
                     <button
-                        @click="handleButtonClick('toggleHeading', { level: 0 })"
-                        :class="{
-                            active:
-                                !props.editor?.isActive('heading') &&
-                                !props.editor?.isActive('paragraph'),
-                        }"
-                        class="toolbar__btn"
-                        title="Обычный текст"
-                    >
-                        <span class="btn-text">Текст</span>
-                    </button>
-                    <button
                         @click="handleButtonClick('toggleHeading', { level: 2 })"
                         :class="{ active: props.editor?.isActive('heading', { level: 2 }) }"
                         class="toolbar__btn"

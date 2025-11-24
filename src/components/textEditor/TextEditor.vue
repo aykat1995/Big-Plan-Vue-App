@@ -42,20 +42,11 @@ const editor = useEditor({
     onUpdate: ({ editor }) => {
         const html = editor.getHTML()
         const text = editor.getText()
-        const title = extractH1Title(html)
 
         activeNote.value.body.content = html
         activeNote.value.body.plainText = text
-        if (title) {
-            activeNote.value.body.title = title
-        }
     },
 })
-
-const extractH1Title = (html: string): string | null => {
-    const match = html.match(/<h1[^>]*>(.*?)<\/h1>/i)
-    return match ? match[1].trim() : null
-}
 
 watch(activeNote, (newNote) => {
     if (newNote && editor.value) {

@@ -6,6 +6,7 @@ export interface Note {
         plainText: string
         title?: string
     }
+    pined?: boolean
     categoryId: number
     createdAt: number
     updatedAt?: number
