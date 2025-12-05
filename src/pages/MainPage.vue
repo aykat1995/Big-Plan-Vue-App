@@ -18,7 +18,7 @@ const handleMainClick = (e) => {
 
         <div class="content-body flex h-[90vh] overflow-hidden shadow-lg">
             <div class="content-body__categories w-1.5/10 h-full bg-[#35445c]">
-                <CategoriesList />
+                <CategoriesList :handleParentClick="handleClick" />
             </div>
             <div class="content-body__notes w-3/10 h-full bg-white border-r border-gray-200">
                 <NotesList :handleParentClick="handleClick" />

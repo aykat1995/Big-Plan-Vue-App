@@ -1,14 +1,14 @@
-import type { Note } from "@/types";
+import type { Note } from '@/types'
 
-export function createNewNote(): Note {
+export function createNewNote(categoryId = -1): Note {
     return {
         id: Date.now(),
         title: '',
-        body : {
+        body: {
             content: '',
-            plainText: ''
+            plainText: '',
         },
-        categoryId: -1,
-        createdAt: Date.now()
+        categoryId: categoryId,
+        createdAt: Date.now(),
     }
 }

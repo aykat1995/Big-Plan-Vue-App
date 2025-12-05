@@ -22,12 +22,30 @@ const handleButtonClick = (action, params = null) => {
                 <span class="group-label">Заголовок</span>
                 <div class="group-buttons flex gap-1">
                     <button
-                        @click="handleButtonClick('toggleHeading', { level: 2 })"
-                        :class="{ active: props.editor?.isActive('heading', { level: 2 }) }"
+                        @click="handleButtonClick('toggleHeading', { level: 1 })"
+                        :class="{ active: props.editor?.isActive('heading', { level: 1 }) }"
                         class="toolbar__btn"
                         title="Заголовок H1"
                     >
                         <span class="btn-text">H1</span>
+                    </button>
+
+                    <button
+                        @click="handleButtonClick('toggleHeading', { level: 2 })"
+                        :class="{ active: props.editor?.isActive('heading', { level: 2 }) }"
+                        class="toolbar__btn"
+                        title="Заголовок H2"
+                    >
+                        <span class="btn-text">H2</span>
+                    </button>
+
+                    <button
+                        @click="handleButtonClick('toggleHeading', { level: 3 })"
+                        :class="{ active: props.editor?.isActive('heading', { level: 3 }) }"
+                        class="toolbar__btn"
+                        title="Заголовок H3"
+                    >
+                        <span class="btn-text">H3</span>
                     </button>
                 </div>
             </div>
@@ -63,10 +81,10 @@ const handleButtonClick = (action, params = null) => {
                 </div>
             </div>
 
-            <!-- Группа: Абзац -->
+            <!-- Группа: Выравнивание -->
             <div class="toolbar__group">
-                <span class="group-label">Абзац</span>
-                <div class="group-buttons flex gap-1">
+                <span class="group-label">Выравнивание</span>
+                <div class="group-buttons">
                     <button
                         @click="handleButtonClick('setTextAlign', 'center')"
                         :class="{ active: props.editor?.isActive({ textAlign: 'center' }) }"
@@ -98,6 +116,21 @@ const handleButtonClick = (action, params = null) => {
                         title="По правому краю"
                     >
                         <img src="/icons/text_align_right.svg" class="icon" alt="по правому краю" />
+                    </button>
+                </div>
+            </div>
+
+            <!-- Группа: Списки -->
+            <div class="toolbar__group">
+                <span class="group-label">Списки</span>
+                <div class="group-buttons flex gap-1">
+                    <button
+                        @click="handleButtonClick('toggleTaskList')"
+                        :class="{ active: props.editor?.isActive('taskList') }"
+                        class="toolbar__btn"
+                        title="Чеклист"
+                    >
+                        <img src="/icons/checkbox_icon.svg" class="icon" alt="&#8226;" />
                     </button>
                     <button
                         @click="handleButtonClick('toggleBulletList')"

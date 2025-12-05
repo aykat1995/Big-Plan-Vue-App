@@ -8,18 +8,14 @@ import { createNewNote } from '@/services/noteUtils'
 const store = useStore()
 const notes = computed(() => store.state.notes)
 const activeCategoryId = computed(() => store.state.activeCategoryId)
+const categories = computed(() => store.state.categories)
 const activeNote = computed(() => store.state.activeNote)
 const activeNodeId = computed(() => activeNote.value?.id ?? null)
-const clickedNote = ref<Note | null>(null)
 const isEditing = ref(false)
 const dropdownPosition = ref({ x: 0, y: 0 })
+const showCategoriesList = ref(false)
 
-const props = defineProps({
-    handleParentClick: {
-        require: true,
-        type: Object,
-    },
-})
+const props = defineProps(['handleParentClick'])
 
 const currentCategoryNotes = computed(() => {
     if (activeCategoryId.value === -1) {
@@ -37,19 +33,18 @@ const noteClickHandle = (id: number) => {
 }
 
 const handleCreatingNote = () => {
-    const newNote = createNewNote()
+    const newNote = createNewNote(activeCategoryId.value)
     store.dispatch('addNote', newNote)
 }
 
 const handleRightClick = (e: MouseEvent, id: number) => {
     e.preventDefault()
+    noteClickHandle(id)
 
     dropdownPosition.value = {
         x: e.clientX,
         y: e.clientY,
     }
-
-    clickedNote.value = notes.value.find((note: Note) => note.id === id)
 
     if (e.which === 3) {
         isEditing.value = true
@@ -57,27 +52,40 @@ const handleRightClick = (e: MouseEvent, id: number) => {
 }
 
 const pinNote = () => {
-    if (clickedNote.value) {
+    if (activeNote.value) {
         store.dispatch('updateNote', {
-            ...clickedNote.value,
+            ...activeNote.value,
             pined: true,
         })
     }
-    clickedNote.value = null
 }
 
 const deleteNote = () => {
     const isConfirm = confirm('Вы действительно хотите удалить заметку?')
     if (isConfirm) {
-        if (clickedNote.value) {
-            store.dispatch('deleteNote', clickedNote.value)
+        if (activeNote.value) {
+            store.dispatch('deleteNote', activeNote.value)
         }
     }
-    clickedNote.value = null
+}
+
+const addToCategory = (categoryId: number) => {
+    if (activeNote.value) {
+        store.dispatch('updateNote', {
+            ...activeNote.value,
+            categoryId: categoryId,
+        })
+        showCategoriesList.value = false
+    }
 }
 
 const closeDropdown = () => {
     isEditing.value = false
+    showCategoriesList.value = false
+}
+
+const toggleShowCategoriesList = () => {
+    showCategoriesList.value = !showCategoriesList.value
 }
 
 watch(
@@ -146,10 +154,44 @@ watch(
                     Закрепить
                 </li>
                 <li
-                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150 flex items-center"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150 flex items-center justify-between relative group"
+                    @mouseenter="showCategoriesList = true"
+                    @mouseleave="showCategoriesList = false"
                 >
-                    <span class="mr-2">📁</span>
-                    Добавить в категорию
+                    <div class="flex items-center">
+                        <span class="mr-2">📁</span>
+                        <span>В категорию</span>
+                    </div>
+                    <span class="text-gray-400">›</span>
+
+                    <!-- Выпадающий список категорий -->
+                    <div
+                        v-if="showCategoriesList"
+                        class="absolute left-full top-0 min-w-[180px] bg-white shadow-xl border border-gray-200 py-2 z-50 categories-dropdown"
+                        @mouseenter="showCategoriesList = true"
+                        @mouseleave="showCategoriesList = false"
+                    >
+                        <div class="max-h-60 overflow-y-auto">
+                            <div
+                                v-for="category in categories"
+                                :key="category.id"
+                                class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors duration-150 flex items-center"
+                                @click="addToCategory(category.id)"
+                            >
+                                <div
+                                    class="w-4 h-4 rounded-full mr-3 flex-shrink-0"
+                                    :style="{ backgroundColor: category.color || 'transparent' }"
+                                ></div>
+                                <span class="text-gray-700 truncate">{{ category.name }}</span>
+                                <span
+                                    v-if="category.id === activeNote?.categoryId"
+                                    class="ml-auto text-blue-500 text-xs font-medium"
+                                >
+                                    ✓
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </li>
                 <li
                     class="px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer transition-colors duration-150 flex items-center border-t border-gray-100"

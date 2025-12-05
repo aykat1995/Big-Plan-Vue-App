@@ -5,6 +5,8 @@ import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
 import Toolbar from './Toolbar.vue'
 
 const store = useStore()
@@ -36,6 +38,17 @@ const editor = useEditor({
             types: ['heading', 'paragraph', 'listItem'],
             alignments: ['left', 'center', 'right', 'justify'],
         }),
+        TaskList.configure({
+            HTMLAttributes: {
+                class: 'task-list',
+            },
+        }),
+        TaskItem.configure({
+            HTMLAttributes: {
+                class: 'task-item',
+            },
+            nested: true,
+        }),
     ],
     content: activeNote.value.body.content || '',
 
@@ -63,7 +76,7 @@ watch(activeNote, (newNote) => {
 const handleToolbarAction = ({ action, params }) => {
     switch (action) {
         case 'toggleHeading':
-            editor.value?.chain().focus().toggleHeading(params).run()
+            editor.value?.chain().focus().toggleHeading({ level: params.level }).run()
             break
 
         case 'toggleBold':
@@ -89,6 +102,8 @@ const handleToolbarAction = ({ action, params }) => {
         case 'toggleOrderedList':
             editor.value?.chain().focus().toggleOrderedList().run()
             break
+        case 'toggleTaskList':
+            editor.value?.chain().focus().toggleTaskList().run()
     }
 }
 
@@ -164,15 +179,54 @@ onUnmounted(() => {
         list-style-type: lower-latin;
         margin: 0;
     }
+
+    /* Стили для чеклиста */
+    ul.task-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0.75em 0;
+
+        li.task-item {
+            display: flex;
+            align-items: center;
+            margin: 0.25em 0;
+            position: relative;
+
+            &[data-checked='true'] {
+                text-decoration: line-through;
+                color: #6b7280;
+            }
+
+            > div {
+                flex: 1;
+                margin-left: 20px;
+            }
+        }
+    }
+}
+
+:deep(.ProseMirror h1) {
+    font-size: 1.3em;
+    font-weight: 800;
+    color: #111827;
+    margin: 1em 0 0.5em 0;
+    border-bottom: 3px solid #3b82f6;
+    padding-bottom: 0.3em;
 }
 
 :deep(.ProseMirror h2) {
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: 700;
     color: #111827;
     margin: 1.5em 0 0.5em 0;
-    border-bottom: 2px solid #3b82f6;
     padding-bottom: 0.3em;
+}
+
+:deep(.ProseMirror h3) {
+    font-size: 1em;
+    font-weight: 600;
+    color: #111827;
+    margin: 1.25em 0 0.5em 0;
 }
 
 :deep(.ProseMirror strong) {

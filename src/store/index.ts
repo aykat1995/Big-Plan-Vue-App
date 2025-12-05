@@ -26,7 +26,7 @@ export const store = createStore<State>({
             }
         },
         DELETE_NOTE(state: State, note: Note) {
-            state.notes.filter((n) => n.id !== note.id)
+            state.notes = state.notes.filter((n) => n.id !== note.id)
         },
         UPDATE_CATEGORY(state: State, category: Category) {
             const index = state.categories.findIndex((c) => c.id === category.id)
@@ -34,6 +34,9 @@ export const store = createStore<State>({
             if (index !== -1) {
                 state.categories[index] = category
             }
+        },
+        DELETE_CATEGORY(state: State, id: number) {
+            state.categories = state.categories.filter((c) => c.id !== id)
         },
         SET_ACTIVE_NOTE(state: State, note: Note) {
             state.activeNote = note
@@ -53,8 +56,11 @@ export const store = createStore<State>({
         updateNote({ commit }, note: Note) {
             commit('UPDATE_NOTE', note)
         },
-        deleteNote({ commit }, note) {
+        deleteNote({ commit }, note: Note) {
             commit('DELETE_NOTE', note)
+        },
+        deleteCategory({ commit }, id: number) {
+            commit('DELETE_CATEGORY', id)
         },
         addCategory({ commit }, category: Category) {
             commit('ADD_CATEGORY', category)
